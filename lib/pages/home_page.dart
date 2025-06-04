@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:job_finder/models/all_job.dart';
 import 'package:job_finder/pages/job_details_page.dart';
 import 'package:job_finder/pages/settings_page.dart';
 import 'package:job_finder/pages/bookmark_page.dart';
@@ -36,7 +37,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   bool _isLoadingJobs = true;
-  List<Job> _jobs = [];
+  List<Datum> _jobs = [];
   String? _error;
 
   @override
@@ -51,11 +52,14 @@ class _HomePageState extends State<HomePage> {
       _error = null;
     });
     try {
-      final fetchedJobs = await JobApi.getAllJobs();
+      AllJob fetchedJobs = await JobApi.getAllJobs();
+
+
       setState(() {
-        _jobs = fetchedJobs;
+
+        _jobs = fetchedJobs.data;
         _isLoadingJobs = false;
-        print('Successfully fetched ${fetchedJobs.length} jobs.');
+        print('Successfully fetched ${fetchedJobs.data.length} jobs.');
       });
     } catch (e, stacktrace) {
       setState(() {
@@ -80,10 +84,10 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, index) {
           final job = _jobs[index];
           print('Rendering job: ${job.title}');
-          print('Company: ${job.companyName}, Logo: ${job.companyLogoUrl}');
-          print('Details: JobType=${job.jobType}, Salary=${job.salaryRange}, Experience=${job.experience}, DaysRemaining=${job.daysRemaining}');
+          // print('Company: ${job.companyName}, Logo: ${job.companyLogoUrl}');
+          // print('Details: JobType=${job.jobType}, Salary=${job.salaryRange}, Experience=${job.experience}, DaysRemaining=${job.daysRemaining}');
           print('Skills: ${job.skills.join(', ')}');
-          print('Expiry: ${job.expiryDate}');
+          // print('Expiry: ${job.expiryDate}');
           return GestureDetector(
             onTap: () {
               Navigator.push(
@@ -137,8 +141,8 @@ class _HomePageState extends State<HomePage> {
                             shape: BoxShape.circle,
                             color: Colors.grey[200],
                           ),
-                          child: (job.companyLogoUrl.isNotEmpty)
-                              ? CircleAvatar(backgroundImage: NetworkImage(job.companyLogoUrl))
+                          child: (job.businessMan.imageUrl.isNotEmpty)
+                              ? CircleAvatar(backgroundImage: NetworkImage(job.businessMan.imageUrl))
                               : const Icon(Icons.business, color: Colors.redAccent),
                         ),
                         const SizedBox(width: 8),
@@ -147,13 +151,13 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                job.companyName,
+                                "${job.workField.name}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                '(' + job.companyId + ')  •  ' + job.views + ' K',
+                                '(' + job.workField.id.toString() + ')  •  ' + job.salaryShow.toString() + ' K',
                                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                               ),
                             ],
@@ -178,15 +182,15 @@ class _HomePageState extends State<HomePage> {
                       spacing: 8.0,
                       runSpacing: 8.0,
                       children: [
-                        _buildInfoChip(Icons.sell, job.jobType),
-                        _buildInfoChip(Icons.money, job.salaryRange),
-                        _buildInfoChip(Icons.verified, job.experience),
-                        _buildInfoChip(Icons.access_time, job.daysRemaining),
+                        // _buildInfoChip(Icons.sell, job.jobType),
+                        // _buildInfoChip(Icons.money, job.salaryRange),
+                        // _buildInfoChip(Icons.verified, job.experience),
+                        // _buildInfoChip(Icons.access_time, job.daysRemaining),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      job.description,
+                      job.fileDescription ?? "No description available",
                       style: const TextStyle(fontSize: 14),
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
@@ -195,11 +199,11 @@ class _HomePageState extends State<HomePage> {
                     Wrap(
                       spacing: 8.0,
                       runSpacing: 8.0,
-                      children: job.skills.map((skill) => Chip(label: Text(skill))).toList(),
+                      children: job.skills.map((skill) => Chip(label: Text("${skill.name ?? ""}"))).toList(),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Expire In : ' + job.expiryDate,
+                      'Expire In : ' + job.experienceYear.toString(),
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ],
